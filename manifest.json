@@ -1,7 +1,7 @@
 {
-    "name": "2048 Puzzle Game",
+    "name": "2048 Ultimate Puzzle Game",
     "short_name": "2048",
-    "description": "A beautifully crafted 2048 puzzle game. Swipe to combine tiles and reach 2048!",
+    "description": "The ultimate 2048 puzzle game with multiple modes, themes, achievements, AI hints, replays, and more!",
     "start_url": "./index.html",
     "display": "standalone",
     "orientation": "portrait",

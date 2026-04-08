@@ -3,22 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="description" content="A beautifully crafted 2048 puzzle game with particles, achievements, themes, and more!">
+    <meta name="description" content="The ultimate 2048 puzzle game — multiple modes, themes, achievements, AI hints, replays, and more!">
     <meta name="theme-color" content="#0f0f1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="2048">
-    <title>2048 — Puzzle Game</title>
+    <title>2048 — Ultimate Puzzle Game</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23667eea'/><text x='50' y='62' font-size='36' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>2048</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Aurora Background -->
+    <canvas id="aurora-canvas"></canvas>
     <!-- Particle Canvas -->
     <canvas id="particle-canvas"></canvas>
     <!-- Confetti Canvas -->
     <canvas id="confetti-canvas"></canvas>
+
+    <!-- Offline Badge -->
+    <div id="offline-badge" class="offline-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+        <span>Offline</span>
+    </div>
+
+    <!-- Install Prompt -->
+    <div id="install-banner" class="install-banner">
+        <span>📲 Install 2048 for the best experience!</span>
+        <div class="install-btns">
+            <button id="install-btn" class="btn-install">Install</button>
+            <button id="dismiss-install" class="btn-dismiss">✕</button>
+        </div>
+    </div>
+
+    <!-- Combo Display -->
+    <div id="combo-display" class="combo-display">
+        <span id="combo-text"></span>
+    </div>
 
     <div id="app">
         <!-- Header -->
@@ -37,25 +59,41 @@
                     </div>
                 </div>
             </div>
-            <div class="header-bottom">
+
+            <!-- Mode Badge + Stats Row -->
+            <div class="header-mid">
+                <div class="mode-badge" id="mode-badge">
+                    <span id="mode-icon">🎮</span>
+                    <span id="mode-name">Classic</span>
+                </div>
                 <div class="stats-row">
                     <div class="stat-pill" id="moves-pill">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         <span id="move-count">0</span>
                     </div>
                     <div class="stat-pill" id="timer-pill">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         <span id="timer">00:00</span>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <button id="undo-btn" class="btn-icon" aria-label="Undo" title="Undo (3 left)">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.6-6.4L3 7"/></svg>
-                        <span class="undo-count" id="undo-count">3</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="header-bottom">
+                <div class="header-actions-left">
+                    <button id="undo-btn" class="btn-icon" aria-label="Undo" title="Undo">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.6-6.4L3 7"/></svg>
+                        <span class="badge" id="undo-count">3</span>
                     </button>
+                    <button id="hint-btn" class="btn-icon" aria-label="Hint" title="AI Hint">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span class="badge" id="hint-count">3</span>
+                    </button>
+                </div>
+                <div class="header-actions-right">
                     <button id="new-game-btn" class="btn-new-game" aria-label="New Game">New Game</button>
                     <button id="settings-btn" class="btn-icon" aria-label="Settings">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                     </button>
                 </div>
             </div>
@@ -66,78 +104,85 @@
             <div id="grid" class="grid">
                 <div id="grid-background" class="grid-background"></div>
                 <div id="tile-container" class="tile-container"></div>
+                <!-- Hint Arrow Overlay -->
+                <div id="hint-overlay" class="hint-overlay">
+                    <div class="hint-arrow" id="hint-arrow"></div>
+                </div>
+                <!-- Game Message -->
                 <div id="game-message" class="game-message">
                     <div class="message-content">
                         <p id="message-text"></p>
+                        <p class="message-sub" id="message-sub"></p>
                         <div class="message-buttons">
                             <button id="retry-btn" class="btn-primary">Try Again</button>
                             <button id="keep-playing-btn" class="btn-secondary" style="display:none;">Keep Playing</button>
+                            <button id="share-btn" class="btn-share">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                Share
+                            </button>
                         </div>
                     </div>
                 </div>
+                <!-- Timed mode countdown -->
+                <div id="countdown-overlay" class="countdown-overlay">
+                    <span id="countdown-number"></span>
+                </div>
+            </div>
+
+            <!-- Replay Controls -->
+            <div id="replay-bar" class="replay-bar" style="display:none;">
+                <button id="replay-prev" class="btn-icon-sm">⏮</button>
+                <button id="replay-play" class="btn-icon-sm">▶</button>
+                <button id="replay-next" class="btn-icon-sm">⏭</button>
+                <input type="range" id="replay-slider" class="replay-slider" min="0" max="0" value="0">
+                <span class="replay-step" id="replay-step">0/0</span>
+                <button id="replay-close" class="btn-icon-sm">✕</button>
             </div>
         </main>
 
         <!-- Bottom Nav -->
         <nav id="bottom-nav">
             <button class="nav-btn active" data-panel="game" id="nav-game">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 <span>Game</span>
             </button>
             <button class="nav-btn" data-panel="stats" id="nav-stats">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                 <span>Stats</span>
             </button>
             <button class="nav-btn" data-panel="achievements" id="nav-achievements">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
                 <span>Awards</span>
             </button>
             <button class="nav-btn" data-panel="leaderboard" id="nav-leaderboard">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
                 <span>Top 10</span>
             </button>
         </nav>
 
         <!-- Panels -->
         <div id="panels">
-            <!-- Stats Panel -->
             <div id="stats-panel" class="panel" style="display:none;">
                 <h2 class="panel-title">Statistics</h2>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-number" id="stat-games">0</span>
-                        <span class="stat-desc">Games Played</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="stat-wins">0</span>
-                        <span class="stat-desc">Games Won</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="stat-winrate">0%</span>
-                        <span class="stat-desc">Win Rate</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="stat-highest">0</span>
-                        <span class="stat-desc">Highest Tile</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="stat-avgscore">0</span>
-                        <span class="stat-desc">Avg Score</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="stat-totalmoves">0</span>
-                        <span class="stat-desc">Total Moves</span>
-                    </div>
+                    <div class="stat-card"><span class="stat-number" id="stat-games">0</span><span class="stat-desc">Games Played</span></div>
+                    <div class="stat-card"><span class="stat-number" id="stat-wins">0</span><span class="stat-desc">Games Won</span></div>
+                    <div class="stat-card"><span class="stat-number" id="stat-winrate">0%</span><span class="stat-desc">Win Rate</span></div>
+                    <div class="stat-card"><span class="stat-number" id="stat-highest">0</span><span class="stat-desc">Highest Tile</span></div>
+                    <div class="stat-card"><span class="stat-number" id="stat-avgscore">0</span><span class="stat-desc">Avg Score</span></div>
+                    <div class="stat-card"><span class="stat-number" id="stat-totalmoves">0</span><span class="stat-desc">Total Moves</span></div>
                 </div>
+                <button id="watch-replay-btn" class="btn-replay-big" style="display:none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Watch Last Replay
+                </button>
             </div>
 
-            <!-- Achievements Panel -->
             <div id="achievements-panel" class="panel" style="display:none;">
                 <h2 class="panel-title">Achievements</h2>
                 <div class="achievements-list" id="achievements-list"></div>
             </div>
 
-            <!-- Leaderboard Panel -->
             <div id="leaderboard-panel" class="panel" style="display:none;">
                 <h2 class="panel-title">Top 10 Scores</h2>
                 <div class="leaderboard-list" id="leaderboard-list"></div>
@@ -155,25 +200,41 @@
                 </button>
             </div>
             <div class="modal-body">
+                <!-- Player Name -->
+                <div class="setting-group">
+                    <label class="setting-label">Player Name</label>
+                    <input type="text" id="player-name" class="input-name" placeholder="Anonymous" maxlength="16" autocomplete="off">
+                </div>
+                <!-- Game Mode -->
+                <div class="setting-group">
+                    <label class="setting-label">Game Mode</label>
+                    <div class="mode-options" id="mode-options">
+                        <button class="mode-btn active" data-mode="classic">🎮 Classic</button>
+                        <button class="mode-btn" data-mode="timed">⏱️ Timed</button>
+                        <button class="mode-btn" data-mode="zen">🧘 Zen</button>
+                        <button class="mode-btn" data-mode="daily">📅 Daily</button>
+                        <button class="mode-btn" data-mode="hard">💀 Hard</button>
+                    </div>
+                </div>
+                <!-- Timed Duration (shown when timed mode) -->
+                <div class="setting-group" id="timed-options" style="display:none;">
+                    <label class="setting-label">Time Limit</label>
+                    <div class="size-options">
+                        <button class="size-btn" data-time="60">1 min</button>
+                        <button class="size-btn active" data-time="120">2 min</button>
+                        <button class="size-btn" data-time="180">3 min</button>
+                        <button class="size-btn" data-time="300">5 min</button>
+                    </div>
+                </div>
                 <!-- Theme -->
                 <div class="setting-group">
                     <label class="setting-label">Theme</label>
                     <div class="theme-options" id="theme-options">
-                        <button class="theme-swatch active" data-theme="dark" title="Dark">
-                            <span style="background:#0f0f1a;"></span>
-                        </button>
-                        <button class="theme-swatch" data-theme="midnight" title="Midnight Blue">
-                            <span style="background:#0a1628;"></span>
-                        </button>
-                        <button class="theme-swatch" data-theme="forest" title="Forest">
-                            <span style="background:#0a1a0f;"></span>
-                        </button>
-                        <button class="theme-swatch" data-theme="sunset" title="Sunset">
-                            <span style="background:#1a0f0f;"></span>
-                        </button>
-                        <button class="theme-swatch" data-theme="light" title="Light">
-                            <span style="background:#f0f0f5;"></span>
-                        </button>
+                        <button class="theme-swatch active" data-theme="dark" title="Dark"><span style="background:#0f0f1a;"></span></button>
+                        <button class="theme-swatch" data-theme="midnight" title="Midnight"><span style="background:#0a1628;"></span></button>
+                        <button class="theme-swatch" data-theme="forest" title="Forest"><span style="background:#0a1a0f;"></span></button>
+                        <button class="theme-swatch" data-theme="sunset" title="Sunset"><span style="background:#1a0f0f;"></span></button>
+                        <button class="theme-swatch" data-theme="light" title="Light"><span style="background:#f0f0f5;"></span></button>
                     </div>
                 </div>
                 <!-- Board Size -->
@@ -186,21 +247,82 @@
                         <button class="size-btn" data-size="6">6×6</button>
                     </div>
                 </div>
-                <!-- Sound -->
+                <!-- Audio -->
                 <div class="setting-group">
                     <label class="setting-label">Sound Effects</label>
-                    <button id="sound-toggle" class="toggle-btn active">
-                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                        <span class="toggle-label" id="sound-label">On</span>
-                    </button>
+                    <div class="toggle-row">
+                        <button id="sound-toggle" class="toggle-btn active"><span class="toggle-track"><span class="toggle-thumb"></span></span><span class="toggle-label" id="sound-label">On</span></button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Background Music</label>
+                    <div class="toggle-row">
+                        <button id="music-toggle" class="toggle-btn"><span class="toggle-track"><span class="toggle-thumb"></span></span><span class="toggle-label" id="music-label">Off</span></button>
+                    </div>
+                </div>
+                <div class="setting-group" id="volume-group">
+                    <label class="setting-label">Volume</label>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
                 </div>
                 <!-- Haptic -->
                 <div class="setting-group">
                     <label class="setting-label">Haptic Feedback</label>
-                    <button id="haptic-toggle" class="toggle-btn active">
-                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                        <span class="toggle-label" id="haptic-label">On</span>
-                    </button>
+                    <div class="toggle-row">
+                        <button id="haptic-toggle" class="toggle-btn active"><span class="toggle-track"><span class="toggle-thumb"></span></span><span class="toggle-label" id="haptic-label">On</span></button>
+                    </div>
+                </div>
+                <!-- Aurora -->
+                <div class="setting-group">
+                    <label class="setting-label">Animated Background</label>
+                    <div class="toggle-row">
+                        <button id="aurora-toggle" class="toggle-btn active"><span class="toggle-track"><span class="toggle-thumb"></span></span><span class="toggle-label" id="aurora-label">On</span></button>
+                    </div>
+                </div>
+                <!-- Challenge -->
+                <div class="setting-group">
+                    <label class="setting-label">Challenge a Friend</label>
+                    <div class="challenge-row">
+                        <input type="text" id="challenge-code" class="input-name" placeholder="Paste code here..." readonly>
+                        <button id="copy-challenge" class="btn-icon-sm" title="Copy">📋</button>
+                        <button id="gen-challenge" class="btn-icon-sm" title="Generate">🎲</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal-overlay">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Share Score</h2>
+                <button id="close-share" class="btn-close" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body share-body">
+                <canvas id="share-canvas" width="400" height="500"></canvas>
+                <div class="share-actions">
+                    <button id="share-download" class="btn-primary">💾 Save Image</button>
+                    <button id="share-copy" class="btn-secondary">📋 Copy Text</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="tutorial-overlay">
+        <div class="tutorial-card" id="tutorial-card">
+            <div class="tutorial-step" id="tutorial-step">
+                <div class="tutorial-illustration" id="tutorial-illustration"></div>
+                <h3 id="tutorial-title"></h3>
+                <p id="tutorial-desc"></p>
+            </div>
+            <div class="tutorial-footer">
+                <div class="tutorial-dots" id="tutorial-dots"></div>
+                <div class="tutorial-btns">
+                    <button id="tutorial-skip" class="btn-text">Skip</button>
+                    <button id="tutorial-next" class="btn-primary btn-sm">Next →</button>
                 </div>
             </div>
         </div>
