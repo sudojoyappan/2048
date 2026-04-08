@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="A beautifully crafted 2048 puzzle game with particles, achievements, themes, and more!">
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2048">
+    <title>2048 — Puzzle Game</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23667eea'/><text x='50' y='62' font-size='36' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>2048</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Particle Canvas -->
+    <canvas id="particle-canvas"></canvas>
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <div id="app">
+        <!-- Header -->
+        <header id="header">
+            <div class="header-top">
+                <h1 id="game-title">2048</h1>
+                <div class="scores">
+                    <div class="score-box" id="score-box">
+                        <span class="score-label">Score</span>
+                        <span class="score-value" id="score">0</span>
+                        <span class="score-addition" id="score-addition"></span>
+                    </div>
+                    <div class="score-box" id="best-box">
+                        <span class="score-label">Best</span>
+                        <span class="score-value" id="best-score">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bottom">
+                <div class="stats-row">
+                    <div class="stat-pill" id="moves-pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <span id="move-count">0</span>
+                    </div>
+                    <div class="stat-pill" id="timer-pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <span id="timer">00:00</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="undo-btn" class="btn-icon" aria-label="Undo" title="Undo (3 left)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.6-6.4L3 7"/></svg>
+                        <span class="undo-count" id="undo-count">3</span>
+                    </button>
+                    <button id="new-game-btn" class="btn-new-game" aria-label="New Game">New Game</button>
+                    <button id="settings-btn" class="btn-icon" aria-label="Settings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Game Grid -->
+        <main id="game-container">
+            <div id="grid" class="grid">
+                <div id="grid-background" class="grid-background"></div>
+                <div id="tile-container" class="tile-container"></div>
+                <div id="game-message" class="game-message">
+                    <div class="message-content">
+                        <p id="message-text"></p>
+                        <div class="message-buttons">
+                            <button id="retry-btn" class="btn-primary">Try Again</button>
+                            <button id="keep-playing-btn" class="btn-secondary" style="display:none;">Keep Playing</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Nav -->
+        <nav id="bottom-nav">
+            <button class="nav-btn active" data-panel="game" id="nav-game">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Game</span>
+            </button>
+            <button class="nav-btn" data-panel="stats" id="nav-stats">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                <span>Stats</span>
+            </button>
+            <button class="nav-btn" data-panel="achievements" id="nav-achievements">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                <span>Awards</span>
+            </button>
+            <button class="nav-btn" data-panel="leaderboard" id="nav-leaderboard">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <span>Top 10</span>
+            </button>
+        </nav>
+
+        <!-- Panels -->
+        <div id="panels">
+            <!-- Stats Panel -->
+            <div id="stats-panel" class="panel" style="display:none;">
+                <h2 class="panel-title">Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number" id="stat-games">0</span>
+                        <span class="stat-desc">Games Played</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="stat-wins">0</span>
+                        <span class="stat-desc">Games Won</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="stat-winrate">0%</span>
+                        <span class="stat-desc">Win Rate</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="stat-highest">0</span>
+                        <span class="stat-desc">Highest Tile</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="stat-avgscore">0</span>
+                        <span class="stat-desc">Avg Score</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="stat-totalmoves">0</span>
+                        <span class="stat-desc">Total Moves</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Panel -->
+            <div id="achievements-panel" class="panel" style="display:none;">
+                <h2 class="panel-title">Achievements</h2>
+                <div class="achievements-list" id="achievements-list"></div>
+            </div>
+
+            <!-- Leaderboard Panel -->
+            <div id="leaderboard-panel" class="panel" style="display:none;">
+                <h2 class="panel-title">Top 10 Scores</h2>
+                <div class="leaderboard-list" id="leaderboard-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="close-settings" class="btn-close" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Theme -->
+                <div class="setting-group">
+                    <label class="setting-label">Theme</label>
+                    <div class="theme-options" id="theme-options">
+                        <button class="theme-swatch active" data-theme="dark" title="Dark">
+                            <span style="background:#0f0f1a;"></span>
+                        </button>
+                        <button class="theme-swatch" data-theme="midnight" title="Midnight Blue">
+                            <span style="background:#0a1628;"></span>
+                        </button>
+                        <button class="theme-swatch" data-theme="forest" title="Forest">
+                            <span style="background:#0a1a0f;"></span>
+                        </button>
+                        <button class="theme-swatch" data-theme="sunset" title="Sunset">
+                            <span style="background:#1a0f0f;"></span>
+                        </button>
+                        <button class="theme-swatch" data-theme="light" title="Light">
+                            <span style="background:#f0f0f5;"></span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Board Size -->
+                <div class="setting-group">
+                    <label class="setting-label">Board Size</label>
+                    <div class="size-options" id="size-options">
+                        <button class="size-btn" data-size="3">3×3</button>
+                        <button class="size-btn active" data-size="4">4×4</button>
+                        <button class="size-btn" data-size="5">5×5</button>
+                        <button class="size-btn" data-size="6">6×6</button>
+                    </div>
+                </div>
+                <!-- Sound -->
+                <div class="setting-group">
+                    <label class="setting-label">Sound Effects</label>
+                    <button id="sound-toggle" class="toggle-btn active">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label" id="sound-label">On</span>
+                    </button>
+                </div>
+                <!-- Haptic -->
+                <div class="setting-group">
+                    <label class="setting-label">Haptic Feedback</label>
+                    <button id="haptic-toggle" class="toggle-btn active">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label" id="haptic-label">On</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Toast -->
+    <div id="achievement-toast" class="achievement-toast">
+        <div class="toast-icon">🏆</div>
+        <div class="toast-body">
+            <span class="toast-title" id="toast-title">Achievement Unlocked!</span>
+            <span class="toast-desc" id="toast-desc"></span>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
